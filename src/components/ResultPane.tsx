@@ -11,7 +11,7 @@ const ResultPane: React.FC<ResultPaneProps> = ({ json }) => {
   const formattedJson = json ? JSON.stringify(json, null, 2) : "";
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "60vh" }}>
       <div
         style={{
           padding: "10px 16px",
@@ -27,13 +27,12 @@ const ResultPane: React.FC<ResultPaneProps> = ({ json }) => {
       <div
         style={{
           flex: 1,
-          overflow: "hidden",
-          minHeight: "500px",
+          minHeight: "60vh",
         }}
       >
         {json ? (
           <Editor
-            height="100%"
+            height="60vh"
             defaultLanguage="json"
             value={formattedJson}
             theme="vs-dark"
@@ -57,7 +56,7 @@ const ResultPane: React.FC<ResultPaneProps> = ({ json }) => {
               color: "#666",
               textAlign: "center",
               marginTop: "40px",
-              height: "100%",
+              minHeight: "60vh",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",

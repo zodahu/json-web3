@@ -1,10 +1,11 @@
 import { useCallback, useState } from 'react';
 
 import {
-  getTokenDecimals,
-  getTokenSymbol,
+  batchGetTokenInfo,
   weiToDecimal,
 } from '../utils/tokenDecimals';
+
+import type { TokenInfo } from '../utils/tokenDecimals';
 
 export interface TokenMapping {
   tokenKey: string;
@@ -53,46 +54,61 @@ export const useConvertAmounts = (initialMappings: TokenMapping[] = []) => {
     setMappings(newMappings);
   }, []);
 
-  /**
-   * 遞迴轉換 JSON 中的金額
-   */
-  const convertAmounts = useCallback(
-    (json: Record<string, unknown>) => {
-      if (!json) return null;
+  // 收集所有代幣地址（第一階段：僅收集地址）
+  const collectTokenAddresses = useCallback(
+    (
+      obj: Record<string, unknown> | unknown[] | null,
+      addresses: Set<string> = new Set()
+    ): Set<string> => {
+      if (!obj || typeof obj !== "object") return addresses;
 
-      try {
-        // 獲取解析後的 JSON
-        const parsedJson = typeof json === "string" ? JSON.parse(json) : json;
+      // 檢查是否有代幣地址鍵
+      for (const mapping of mappings) {
+        const tokenKey = mapping.tokenKey;
 
-        // 深拷貝以避免修改原始數據
-        const result = JSON.parse(JSON.stringify(parsedJson));
-
-        // 首先，找出所有的代幣地址及其對應的解析信息
-        const tokenInfo = collectTokenInfo(result);
-
-        // 然後，使用收集到的代幣信息處理所有金額
-        processWithTokenInfo(result, tokenInfo);
-
-        setConvertedJson(result);
-        return result;
-      } catch (error) {
-        console.error("Error converting amounts:", error);
-        return json;
+        if (
+          !Array.isArray(obj) &&
+          tokenKey in obj &&
+          typeof obj[tokenKey] === "string"
+        ) {
+          const tokenAddress = (obj[tokenKey] as string).toLowerCase();
+          addresses.add(tokenAddress);
+        }
       }
+
+      // 遞迴處理數組
+      if (Array.isArray(obj)) {
+        for (const item of obj) {
+          if (item && typeof item === "object") {
+            collectTokenAddresses(item as Record<string, unknown>, addresses);
+          }
+        }
+      }
+      // 遞迴處理對象
+      else {
+        for (const key of Object.keys(obj)) {
+          if (obj[key] && typeof obj[key] === "object") {
+            collectTokenAddresses(obj[key] as Record<string, unknown>, addresses);
+          }
+        }
+      }
+
+      return addresses;
     },
     [mappings]
   );
 
-  // 收集所有代幣地址及對應的解析信息
+  // 收集所有代幣地址及對應的解析信息（異步版本，使用批量查詢）
   const collectTokenInfo = useCallback(
-    (
+    async (
       obj: Record<string, unknown> | unknown[] | null,
       path: string = "",
       info: Record<
         string,
         { address: string; decimals: number; symbol: string }
-      > = {}
-    ) => {
+      > = {},
+      tokenInfoMap?: Map<string, TokenInfo>
+    ): Promise<Record<string, { address: string; decimals: number; symbol: string }>> => {
       if (!obj || typeof obj !== "object") return info;
 
       // 檢查是否有代幣地址鍵
@@ -107,41 +123,45 @@ export const useConvertAmounts = (initialMappings: TokenMapping[] = []) => {
           const tokenAddress = (obj[tokenKey] as string).toLowerCase();
           const currentPath = path ? `${path}.${tokenKey}` : tokenKey;
 
-          const decimals = getTokenDecimals(tokenAddress);
-          const symbol = getTokenSymbol(tokenAddress);
-
-          // 保存代幣信息，以及相關的路徑信息
-          info[currentPath] = {
-            address: tokenAddress,
-            decimals,
-            symbol,
-          };
+          // 從批量查詢結果中獲取 token 信息
+          const tokenInfo = tokenInfoMap?.get(tokenAddress);
+          if (tokenInfo) {
+            info[currentPath] = {
+              address: tokenAddress,
+              decimals: tokenInfo.decimals,
+              symbol: tokenInfo.symbol,
+            };
+          }
         }
       }
 
       // 遞迴處理數組
       if (Array.isArray(obj)) {
-        obj.forEach((item, index) => {
+        for (let index = 0; index < obj.length; index++) {
+          const item = obj[index];
           if (item && typeof item === "object") {
-            collectTokenInfo(
+            await collectTokenInfo(
               item as Record<string, unknown>,
               path ? `${path}[${index}]` : `[${index}]`,
-              info
+              info,
+              tokenInfoMap
             );
           }
-        });
+        }
       }
       // 遞迴處理對象
       else {
-        Object.keys(obj).forEach((key) => {
+        const keys = Object.keys(obj);
+        for (const key of keys) {
           if (obj[key] && typeof obj[key] === "object") {
-            collectTokenInfo(
+            await collectTokenInfo(
               obj[key] as Record<string, unknown>,
               path ? `${path}.${key}` : key,
-              info
+              info,
+              tokenInfoMap
             );
           }
-        });
+        }
       }
 
       return info;
@@ -149,16 +169,17 @@ export const useConvertAmounts = (initialMappings: TokenMapping[] = []) => {
     [mappings]
   );
 
-  // 使用收集到的代幣信息處理所有金額
+  // 使用收集到的代幣信息處理所有金額（異步版本）
   const processWithTokenInfo = useCallback(
-    (
+    async (
       obj: Record<string, unknown> | unknown[] | null,
       tokenInfo: Record<
         string,
         { address: string; decimals: number; symbol: string }
       >,
+      tokenInfoMap?: Map<string, TokenInfo>,
       path: string = ""
-    ) => {
+    ): Promise<void> => {
       if (!obj || typeof obj !== "object") return;
 
       // 處理每個可能的金額鍵
@@ -200,10 +221,12 @@ export const useConvertAmounts = (initialMappings: TokenMapping[] = []) => {
           tokenKey === "sellToken" &&
           typeof obj.sellToken === "string"
         ) {
+          const tokenAddress = obj.sellToken.toLowerCase();
+          const tokenInfoData = tokenInfoMap?.get(tokenAddress) || { decimals: 18, symbol: "", chain: "mainnet" };
           const currentTokenInfo = {
-            address: obj.sellToken.toLowerCase(),
-            decimals: getTokenDecimals(obj.sellToken.toLowerCase()),
-            symbol: getTokenSymbol(obj.sellToken.toLowerCase()),
+            address: tokenAddress,
+            decimals: tokenInfoData.decimals,
+            symbol: tokenInfoData.symbol,
           };
 
           // 處理該對象內的 sellAmount
@@ -224,10 +247,12 @@ export const useConvertAmounts = (initialMappings: TokenMapping[] = []) => {
           tokenKey === "buyToken" &&
           typeof obj.buyToken === "string"
         ) {
+          const tokenAddress = obj.buyToken.toLowerCase();
+          const tokenInfoData = tokenInfoMap?.get(tokenAddress) || { decimals: 18, symbol: "", chain: "mainnet" };
           const currentTokenInfo = {
-            address: obj.buyToken.toLowerCase(),
-            decimals: getTokenDecimals(obj.buyToken.toLowerCase()),
-            symbol: getTokenSymbol(obj.buyToken.toLowerCase()),
+            address: tokenAddress,
+            decimals: tokenInfoData.decimals,
+            symbol: tokenInfoData.symbol,
           };
 
           // 處理該對象內的 buyAmount
@@ -267,30 +292,70 @@ export const useConvertAmounts = (initialMappings: TokenMapping[] = []) => {
 
       // 遞迴處理數組
       if (Array.isArray(obj)) {
-        obj.forEach((item, index) => {
+        for (let index = 0; index < obj.length; index++) {
+          const item = obj[index];
           if (item && typeof item === "object") {
-            processWithTokenInfo(
+            await processWithTokenInfo(
               item as Record<string, unknown>,
               tokenInfo,
+              tokenInfoMap,
               path ? `${path}[${index}]` : `[${index}]`
             );
           }
-        });
+        }
       }
       // 遞迴處理對象
       else {
-        Object.keys(obj).forEach((key) => {
+        const keys = Object.keys(obj);
+        for (const key of keys) {
           if (obj[key] && typeof obj[key] === "object") {
-            processWithTokenInfo(
+            await processWithTokenInfo(
               obj[key] as Record<string, unknown>,
               tokenInfo,
+              tokenInfoMap,
               path ? `${path}.${key}` : key
             );
           }
-        });
+        }
       }
     },
     [mappings]
+  );
+
+  /**
+   * 遞迴轉換 JSON 中的金額
+   */
+  const convertAmounts = useCallback(
+    async (json: Record<string, unknown>) => {
+      if (!json) return null;
+
+      try {
+        // 獲取解析後的 JSON
+        const parsedJson = typeof json === "string" ? JSON.parse(json) : json;
+
+        // 深拷貝以避免修改原始數據
+        const result = JSON.parse(JSON.stringify(parsedJson));
+
+        // 第一階段：收集所有需要查詢的 token 地址
+        const tokenAddresses = collectTokenAddresses(result);
+        
+        // 第二階段：批量查詢所有 token 信息
+        const tokenInfoMap = await batchGetTokenInfo(Array.from(tokenAddresses));
+
+        // 第三階段：使用批量查詢結果構建 tokenInfo 映射
+        const tokenInfo = await collectTokenInfo(result, "", {}, tokenInfoMap);
+
+        // 第四階段：使用收集到的代幣信息處理所有金額
+        await processWithTokenInfo(result, tokenInfo, tokenInfoMap);
+
+        setConvertedJson(result);
+        return result;
+      } catch (error) {
+        console.error("Error converting amounts:", error);
+        return json;
+      }
+    },
+    [mappings, collectTokenAddresses, collectTokenInfo, processWithTokenInfo]
   );
 
   return {

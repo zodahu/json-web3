@@ -6,6 +6,7 @@ export interface TokenDecimal {
   address: string;
   decimals: number;
   symbol: string;
+  chain: "mainnet" | "base";
 }
 
 interface TokenDecimalsManagerProps {
@@ -21,10 +22,13 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
   const [newTokenAddress, setNewTokenAddress] = useState("");
   const [newTokenDecimals, setNewTokenDecimals] = useState("18");
   const [newTokenSymbol, setNewTokenSymbol] = useState("");
+  const [newTokenChain, setNewTokenChain] = useState<"mainnet" | "base">("mainnet");
+  const [selectedChain, setSelectedChain] = useState<"all" | "mainnet" | "base">("all");
   const [tokenList, setTokenList] = useState<TokenDecimal[]>([]);
   const [editingToken, setEditingToken] = useState<string | null>(null);
   const [editDecimals, setEditDecimals] = useState("");
   const [editSymbol, setEditSymbol] = useState("");
+  const [editChain, setEditChain] = useState<"mainnet" | "base">("mainnet");
 
   // 將物件轉換為陣列方便處理
   useEffect(() => {
@@ -32,17 +36,29 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
       address,
       decimals: tokenInfo.decimals,
       symbol: tokenInfo.symbol || "",
+      chain: tokenInfo.chain,
     }));
     setTokenList(list);
   }, [tokenDecimals]);
 
   // 過濾後的列表
-  const filteredTokens = tokenList.filter(
-    (token) =>
-      token.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (token.symbol &&
-        token.symbol.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredTokens = tokenList.filter((token) => {
+    // 鏈篩選
+    if (selectedChain !== "all" && token.chain !== selectedChain) {
+      return false;
+    }
+    
+    // 搜尋篩選
+    if (searchTerm) {
+      return (
+        token.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (token.symbol &&
+          token.symbol.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+    
+    return true;
+  });
 
   // 新增代幣
   const handleAddToken = () => {
@@ -59,6 +75,7 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
       [normalizedAddress]: {
         decimals,
         symbol: newTokenSymbol || "",
+        chain: newTokenChain,
       },
     };
 
@@ -66,6 +83,7 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
     setNewTokenAddress("");
     setNewTokenDecimals("18");
     setNewTokenSymbol("");
+    setNewTokenChain("mainnet");
   };
 
   // 刪除代幣
@@ -80,6 +98,7 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
     setEditingToken(token.address);
     setEditDecimals(token.decimals.toString());
     setEditSymbol(token.symbol || "");
+    setEditChain(token.chain);
   };
 
   // 保存編輯
@@ -94,6 +113,7 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
     newTokens[editingToken] = {
       decimals,
       symbol: editSymbol || "",
+      chain: editChain,
     };
 
     onUpdate(newTokens);
@@ -113,6 +133,62 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
         padding: "16px",
       }}
     >
+      {/* 鏈選擇器 */}
+      <div
+        style={{
+          display: "flex",
+          gap: "8px",
+          marginBottom: "16px",
+          borderRadius: "4px",
+          overflow: "hidden",
+          border: "1px solid #444",
+          backgroundColor: "#2d2d2d",
+        }}
+      >
+        <button
+          onClick={() => setSelectedChain("all")}
+          style={{
+            flex: 1,
+            padding: "8px 16px",
+            backgroundColor: selectedChain === "all" ? "#0e639c" : "transparent",
+            border: "none",
+            color: "white",
+            cursor: "pointer",
+            fontWeight: selectedChain === "all" ? "500" : "normal",
+          }}
+        >
+          全部
+        </button>
+        <button
+          onClick={() => setSelectedChain("mainnet")}
+          style={{
+            flex: 1,
+            padding: "8px 16px",
+            backgroundColor: selectedChain === "mainnet" ? "#0e639c" : "transparent",
+            border: "none",
+            color: "white",
+            cursor: "pointer",
+            fontWeight: selectedChain === "mainnet" ? "500" : "normal",
+          }}
+        >
+          Mainnet
+        </button>
+        <button
+          onClick={() => setSelectedChain("base")}
+          style={{
+            flex: 1,
+            padding: "8px 16px",
+            backgroundColor: selectedChain === "base" ? "#0e639c" : "transparent",
+            border: "none",
+            color: "white",
+            cursor: "pointer",
+            fontWeight: selectedChain === "base" ? "500" : "normal",
+          }}
+        >
+          Base
+        </button>
+      </div>
+
       {/* 搜尋框 */}
       <div style={{ marginBottom: "16px" }}>
         <input
@@ -146,7 +222,7 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
           onChange={(e) => setNewTokenAddress(e.target.value)}
           placeholder="代幣地址 (0x...)"
           style={{
-            flex: "3 1 300px",
+            flex: "3 1 200px",
             padding: "8px 12px",
             backgroundColor: "#2d2d2d",
             border: "1px solid #444",
@@ -160,7 +236,7 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
           onChange={(e) => setNewTokenSymbol(e.target.value)}
           placeholder="符號 (選填)"
           style={{
-            flex: "1 1 100px",
+            flex: "1 1 80px",
             padding: "8px 12px",
             backgroundColor: "#2d2d2d",
             border: "1px solid #444",
@@ -174,7 +250,7 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
           onChange={(e) => setNewTokenDecimals(e.target.value)}
           placeholder="小數位 (例: 18)"
           style={{
-            flex: "1 1 80px",
+            flex: "1 1 60px",
             padding: "8px 12px",
             backgroundColor: "#2d2d2d",
             border: "1px solid #444",
@@ -182,6 +258,22 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
             color: "white",
           }}
         />
+        <select
+          value={newTokenChain}
+          onChange={(e) => setNewTokenChain(e.target.value as "mainnet" | "base")}
+          style={{
+            flex: "1 1 90px",
+            padding: "8px 12px",
+            backgroundColor: "#2d2d2d",
+            border: "1px solid #444",
+            borderRadius: "4px",
+            color: "white",
+            cursor: "pointer",
+          }}
+        >
+          <option value="mainnet">Mainnet</option>
+          <option value="base">Base</option>
+        </select>
         <button
           onClick={handleAddToken}
           style={{
@@ -215,6 +307,7 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
                   padding: "8px 12px",
                   textAlign: "left",
                   borderBottom: "1px solid #444",
+                  width: "50%",
                 }}
               >
                 代幣地址
@@ -224,6 +317,7 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
                   padding: "8px 12px",
                   textAlign: "center",
                   borderBottom: "1px solid #444",
+                  width: "10%",
                 }}
               >
                 小數位
@@ -231,8 +325,19 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
               <th
                 style={{
                   padding: "8px 12px",
+                  textAlign: "center",
+                  borderBottom: "1px solid #444",
+                  width: "15%",
+                }}
+              >
+                鏈
+              </th>
+              <th
+                style={{
+                  padding: "8px 12px",
                   textAlign: "right",
                   borderBottom: "1px solid #444",
+                  width: "25%",
                 }}
               >
                 操作
@@ -304,6 +409,34 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
                       </div>
                     ) : (
                       <span style={{ color: "#b5cea8" }}>{token.decimals}</span>
+                    )}
+                  </td>
+                  <td style={{ padding: "8px 12px", textAlign: "center" }}>
+                    {editingToken === token.address ? (
+                      <select
+                        value={editChain}
+                        onChange={(e) => setEditChain(e.target.value as "mainnet" | "base")}
+                        style={{
+                          padding: "4px 8px",
+                          backgroundColor: "#2d2d2d",
+                          border: "1px solid #444",
+                          borderRadius: "4px",
+                          color: "white",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <option value="mainnet">Mainnet</option>
+                        <option value="base">Base</option>
+                      </select>
+                    ) : (
+                      <span
+                        style={{
+                          color: token.chain === "mainnet" ? "#4ec9b0" : "#dcdcaa",
+                          fontWeight: "500",
+                        }}
+                      >
+                        {token.chain === "mainnet" ? "Mainnet" : "Base"}
+                      </span>
                     )}
                   </td>
                   <td style={{ padding: "8px 12px", textAlign: "right" }}>
@@ -388,14 +521,16 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
             ) : (
               <tr>
                 <td
-                  colSpan={3}
+                  colSpan={4}
                   style={{
                     padding: "16px",
                     textAlign: "center",
                     color: "#888",
                   }}
                 >
-                  {searchTerm ? "沒有符合搜尋條件的代幣" : "沒有代幣資料"}
+                  {searchTerm || selectedChain !== "all"
+                    ? "沒有符合篩選條件的代幣"
+                    : "沒有代幣資料"}
                 </td>
               </tr>
             )}

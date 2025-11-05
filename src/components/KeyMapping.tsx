@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 interface TokenMapping {
   tokenKey: string;
@@ -11,8 +11,8 @@ interface KeyMappingProps {
 }
 
 const KeyMapping: React.FC<KeyMappingProps> = ({ mappings, onUpdate }) => {
-  const [newTokenKey, setNewTokenKey] = useState("tokenIn");
-  const [newAmountKey, setNewAmountKey] = useState("amountIn");
+  const [newTokenKey, setNewTokenKey] = useState("");
+  const [newAmountKey, setNewAmountKey] = useState("");
   const [selectedMappingIndex, setSelectedMappingIndex] = useState<
     number | null
   >(null);
@@ -21,7 +21,7 @@ const KeyMapping: React.FC<KeyMappingProps> = ({ mappings, onUpdate }) => {
     if (newTokenKey.trim() === "") return;
 
     onUpdate([...mappings, { tokenKey: newTokenKey, amountKeys: [] }]);
-    setNewTokenKey("tokenIn");
+    setNewTokenKey("");
     setSelectedMappingIndex(mappings.length);
   };
 

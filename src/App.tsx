@@ -1,17 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
-import './App.css';
+import "./App.css";
 
-import JsonEditorPane from './components/JsonEditorPane';
-import ResultPane from './components/ResultPane';
-import SettingsPanel from './components/SettingsPanel';
-import type { TokenInfo } from './utils/tokenDecimals';
-import type { TokenMapping } from './hooks/useConvertAmounts';
+import JsonEditorPane from "./components/JsonEditorPane";
+import ResultPane from "./components/ResultPane";
+import SettingsPanel from "./components/SettingsPanel";
+import type { TokenInfo } from "./utils/tokenDecimals";
+import type { TokenMapping } from "./hooks/useConvertAmounts";
 import {
   getTokenDecimalsList,
   updateTokenDecimals,
-} from './utils/tokenDecimals';
-import useConvertAmounts from './hooks/useConvertAmounts';
+} from "./utils/tokenDecimals";
+import useConvertAmounts from "./hooks/useConvertAmounts";
 
 // 範例 JSON 結構
 const sampleJson = {
@@ -120,11 +120,16 @@ const defaultMappings: TokenMapping[] = [
   },
   {
     tokenKey: "sellToken",
-    amountKeys: ["sellAmount"],
+    amountKeys: ["sellAmount", "fee"],
   },
   {
     tokenKey: "buyToken",
     amountKeys: ["buyAmount"],
+  },
+  // Uniswap order format
+  {
+    tokenKey: "token",
+    amountKeys: ["startAmount", "endAmount"],
   },
 ];
 
@@ -151,7 +156,15 @@ function App() {
   // 當 JSON 或映射變化時，重新轉換
   useEffect(() => {
     if (editorJson) {
-      convertAmounts(editorJson);
+      // 異步轉換
+      convertAmounts(editorJson)
+        .then(() => {
+          // 轉換完成後，更新 tokenDecimals state（可能有新的 RPC 查詢結果）
+          setTokenDecimals(getTokenDecimalsList());
+        })
+        .catch((error) => {
+          console.error("Failed to convert amounts:", error);
+        });
     }
   }, [editorJson, mappings, convertAmounts]);
 
@@ -163,13 +176,24 @@ function App() {
     updateTokenDecimals(newTokenDecimals);
     // 更新後重新轉換
     if (editorJson) {
-      convertAmounts(editorJson);
+      convertAmounts(editorJson)
+        .then(() => {
+          // 轉換完成後，更新 tokenDecimals state（可能有新的 RPC 查詢結果）
+          setTokenDecimals(getTokenDecimalsList());
+        })
+        .catch((error) => {
+          console.error("Failed to convert amounts:", error);
+        });
     }
   };
 
   // 切換標籤頁
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
+    // 切換到設定頁面時，更新 tokenDecimals（確保顯示最新的 RPC 查詢結果）
+    if (tab === "settings") {
+      setTokenDecimals(getTokenDecimalsList());
+    }
   };
 
   return (
@@ -225,8 +249,7 @@ function App() {
           borderBottomRightRadius: "8px",
           boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
           padding: activeTab === "settings" ? "16px" : "0",
-          height: "80vh",
-          overflow: "hidden",
+          minHeight: activeTab === "settings" ? "80vh" : "auto",
           display: "flex",
           flexDirection: "column",
         }}
@@ -236,7 +259,6 @@ function App() {
             style={{
               display: "flex",
               flexDirection: "row",
-              height: "100%",
               gap: "16px",
               padding: "16px",
             }}
@@ -245,11 +267,11 @@ function App() {
             <div
               style={{
                 width: "50%",
-                height: "100%",
                 backgroundColor: "#1e1e1e",
                 border: "1px solid #333",
                 borderRadius: "8px",
-                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
               }}
             >
               <JsonEditorPane json={editorJson} onChange={setEditorJson} />
@@ -259,11 +281,11 @@ function App() {
             <div
               style={{
                 width: "50%",
-                height: "100%",
                 backgroundColor: "#1e1e1e",
                 border: "1px solid #333",
                 borderRadius: "8px",
-                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
               }}
             >
               <ResultPane json={convertedJson} />
