@@ -4,6 +4,7 @@ import {
   batchGetTokenInfo,
   weiToDecimal,
 } from '../utils/tokenDecimals';
+import { isUnixTimestamp, convertTimestampValue } from '../utils/timestamp';
 
 import type { TokenInfo } from '../utils/tokenDecimals';
 
@@ -305,6 +306,34 @@ export const useConvertAmounts = (initialMappings: TokenMapping[] = []) => {
                   : `${convertedAmount}`;
               }
             }
+          }
+        }
+      }
+
+      // Convert Unix timestamps in all values (except already processed token amounts)
+      if (!Array.isArray(obj)) {
+        for (const key of Object.keys(obj)) {
+          const value = obj[key];
+          
+          // Skip if value is not a number or numeric string
+          if (typeof value !== "number" && typeof value !== "string") {
+            continue;
+          }
+          
+          // Skip if already converted (contains parentheses from previous conversions)
+          if (typeof value === "string" && value.includes("(")) {
+            continue;
+          }
+          
+          // Check if it's a numeric string or number that could be a timestamp
+          const numValue = typeof value === "string" ? parseInt(value, 10) : value;
+          if (isNaN(numValue)) {
+            continue;
+          }
+          
+          // Convert if it's a valid Unix timestamp
+          if (isUnixTimestamp(numValue)) {
+            obj[key] = convertTimestampValue(value);
           }
         }
       }
