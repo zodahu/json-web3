@@ -325,6 +325,54 @@ export const useConvertAmounts = (initialMappings: TokenMapping[] = []) => {
       }
       // 遞迴處理對象
       else {
+        // 特殊處理 Uniswap X order 的 cosignerData
+        if (!Array.isArray(obj) && 'cosignerData' in obj && obj.cosignerData && typeof obj.cosignerData === 'object') {
+          const cosignerData = obj.cosignerData as Record<string, unknown>;
+          
+          // 取得 input.token 的 decimals 來轉換 inputOverride
+          if ('input' in obj && obj.input && typeof obj.input === 'object') {
+            const input = obj.input as Record<string, unknown>;
+            if ('token' in input && typeof input.token === 'string') {
+              // 移除可能已經添加的 symbol (例如 "0x... (SYMBOL)")
+              const tokenAddress = input.token.toLowerCase().split(' ')[0];
+              const tokenInfoData = tokenInfoMap?.get(tokenAddress);
+              
+              // 轉換 inputOverride
+              if (tokenInfoData && 'inputOverride' in cosignerData && typeof cosignerData.inputOverride === 'string') {
+                const convertedAmount = weiToDecimal(cosignerData.inputOverride, tokenInfoData.decimals);
+                cosignerData.inputOverride = tokenInfoData.symbol 
+                  ? `${convertedAmount} (${tokenInfoData.symbol})`
+                  : convertedAmount;
+              }
+            }
+          }
+          
+          // 取得 outputs 陣列來轉換 outputOverrides
+          if ('outputs' in obj && Array.isArray(obj.outputs)) {
+            const outputs = obj.outputs as Array<Record<string, unknown>>;
+            
+            // 轉換 outputOverrides 陣列
+            if ('outputOverrides' in cosignerData && Array.isArray(cosignerData.outputOverrides)) {
+              const outputOverrides = cosignerData.outputOverrides as Array<unknown>;
+              
+              for (let i = 0; i < outputOverrides.length; i++) {
+                if (typeof outputOverrides[i] === 'string' && outputs[i] && 'token' in outputs[i]) {
+                  // 移除可能已經添加的 symbol
+                  const tokenAddress = (outputs[i].token as string).toLowerCase().split(' ')[0];
+                  const tokenInfoData = tokenInfoMap?.get(tokenAddress);
+                  
+                  if (tokenInfoData) {
+                    const convertedAmount = weiToDecimal(outputOverrides[i] as string, tokenInfoData.decimals);
+                    outputOverrides[i] = tokenInfoData.symbol
+                      ? `${convertedAmount} (${tokenInfoData.symbol})`
+                      : convertedAmount;
+                  }
+                }
+              }
+            }
+          }
+        }
+        
         const keys = Object.keys(obj);
         for (const key of keys) {
           if (obj[key] && typeof obj[key] === "object") {
