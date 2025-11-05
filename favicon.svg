@@ -1,0 +1,11 @@
+<svg width="192" height="192" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
+  <!-- 白色背景圓形 -->
+  <circle cx="96" cy="96" r="92" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="2" />
+  
+  <!-- 更大更明顯的字母 D 設計 - 使用鮮豔的綠色 -->
+  <path d="M48 38 H80 C115 38, 140 60, 140 96 C140 132, 115 154, 80 154 H48 Z" fill="#10A37F" />
+  <path d="M58 52 H78 C104 52, 122 70, 122 96 C122 122, 104 140, 78 140 H58 Z" fill="#FFFFFF" />
+  
+  <!-- 更大的小數點符號 -->
+  <circle cx="130" cy="130" r="12" fill="#FF3B30" />
+</svg> 
