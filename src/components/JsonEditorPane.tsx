@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from "react";
 
-import Editor from '@monaco-editor/react';
-import type { editor } from 'monaco-editor';
+import Editor from "@monaco-editor/react";
+import type { editor } from "monaco-editor";
 
 interface JsonEditorPaneProps {
   json: Record<string, unknown>;
@@ -49,7 +49,9 @@ const JsonEditorPane: React.FC<JsonEditorPaneProps> = ({ json, onChange }) => {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: "60vh" }}>
+    <div
+      style={{ display: "flex", flexDirection: "column", minHeight: "60vh" }}
+    >
       <div
         style={{
           padding: "10px 16px",
@@ -61,7 +63,7 @@ const JsonEditorPane: React.FC<JsonEditorPaneProps> = ({ json, onChange }) => {
         }}
       >
         <h2 style={{ fontSize: "1.1rem", fontWeight: "500", margin: 0 }}>
-          JSON 編輯器
+          JSON Editor
         </h2>
       </div>
 

@@ -221,7 +221,7 @@ function App() {
             cursor: "pointer",
           }}
         >
-          主界面
+          Converter
         </button>
         <button
           onClick={() => handleTabChange("settings")}
@@ -237,7 +237,7 @@ function App() {
             cursor: "pointer",
           }}
         >
-          設定
+          Settings
         </button>
       </div>
 

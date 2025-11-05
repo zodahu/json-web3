@@ -69,7 +69,7 @@ const KeyMapping: React.FC<KeyMappingProps> = ({ mappings, onUpdate }) => {
           type="text"
           value={newTokenKey}
           onChange={(e) => setNewTokenKey(e.target.value)}
-          placeholder="代幣鍵名 (例如: tokenIn)"
+          placeholder="Token key (e.g., tokenIn)"
           style={{
             flex: "1",
             padding: "8px 12px",
@@ -90,7 +90,7 @@ const KeyMapping: React.FC<KeyMappingProps> = ({ mappings, onUpdate }) => {
             cursor: "pointer",
           }}
         >
-          新增映射
+          Add Mapping
         </button>
       </div>
 
@@ -110,7 +110,7 @@ const KeyMapping: React.FC<KeyMappingProps> = ({ mappings, onUpdate }) => {
               color: "#9cdcfe",
             }}
           >
-            代幣鍵
+            Token Keys
           </h4>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             {mappings.map((mapping, index) => (
@@ -160,7 +160,7 @@ const KeyMapping: React.FC<KeyMappingProps> = ({ mappings, onUpdate }) => {
                   color: "#9cdcfe",
                 }}
               >
-                {mappings[selectedMappingIndex].tokenKey} 對應的金額鍵
+                Amount Keys for {mappings[selectedMappingIndex].tokenKey}
               </h4>
               <div
                 style={{ display: "flex", marginBottom: "12px", gap: "8px" }}
@@ -169,7 +169,7 @@ const KeyMapping: React.FC<KeyMappingProps> = ({ mappings, onUpdate }) => {
                   type="text"
                   value={newAmountKey}
                   onChange={(e) => setNewAmountKey(e.target.value)}
-                  placeholder="金額鍵名 (例如: amountIn)"
+                  placeholder="Amount key (e.g., amountIn)"
                   style={{
                     flex: "1",
                     padding: "8px 12px",
@@ -191,7 +191,7 @@ const KeyMapping: React.FC<KeyMappingProps> = ({ mappings, onUpdate }) => {
                     cursor: "pointer",
                   }}
                 >
-                  新增鍵名
+                  Add Key
                 </button>
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
@@ -238,7 +238,7 @@ const KeyMapping: React.FC<KeyMappingProps> = ({ mappings, onUpdate }) => {
                 color: "#888",
               }}
             >
-              請從左側選擇一個代幣鍵以配置對應的金額鍵
+              Select a token key from the left to configure amount keys
             </div>
           )}
         </div>

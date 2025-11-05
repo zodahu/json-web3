@@ -19,10 +19,6 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
   onUpdate,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [newTokenAddress, setNewTokenAddress] = useState("");
-  const [newTokenDecimals, setNewTokenDecimals] = useState("18");
-  const [newTokenSymbol, setNewTokenSymbol] = useState("");
-  const [newTokenChain, setNewTokenChain] = useState<"mainnet" | "base">("mainnet");
   const [selectedChain, setSelectedChain] = useState<"all" | "mainnet" | "base">("all");
   const [tokenList, setTokenList] = useState<TokenDecimal[]>([]);
   const [editingToken, setEditingToken] = useState<string | null>(null);
@@ -59,32 +55,6 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
     
     return true;
   });
-
-  // 新增代幣
-  const handleAddToken = () => {
-    if (!newTokenAddress || !newTokenDecimals) return;
-
-    const decimals = parseInt(newTokenDecimals, 10);
-    if (isNaN(decimals)) return;
-
-    // 確保地址使用小寫
-    const normalizedAddress = newTokenAddress.toLowerCase();
-
-    const newTokens = {
-      ...tokenDecimals,
-      [normalizedAddress]: {
-        decimals,
-        symbol: newTokenSymbol || "",
-        chain: newTokenChain,
-      },
-    };
-
-    onUpdate(newTokens);
-    setNewTokenAddress("");
-    setNewTokenDecimals("18");
-    setNewTokenSymbol("");
-    setNewTokenChain("mainnet");
-  };
 
   // 刪除代幣
   const handleDeleteToken = (address: string) => {
@@ -157,7 +127,7 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
             fontWeight: selectedChain === "all" ? "500" : "normal",
           }}
         >
-          全部
+          All
         </button>
         <button
           onClick={() => setSelectedChain("mainnet")}
@@ -195,7 +165,7 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="搜尋代幣地址或符號..."
+          placeholder="Search token address or symbol..."
           style={{
             width: "100%",
             padding: "8px 12px",
@@ -205,89 +175,6 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
             color: "white",
           }}
         />
-      </div>
-
-      {/* 新增代幣區域 */}
-      <div
-        style={{
-          display: "flex",
-          gap: "8px",
-          marginBottom: "16px",
-          flexWrap: "wrap",
-        }}
-      >
-        <input
-          type="text"
-          value={newTokenAddress}
-          onChange={(e) => setNewTokenAddress(e.target.value)}
-          placeholder="代幣地址 (0x...)"
-          style={{
-            flex: "3 1 200px",
-            padding: "8px 12px",
-            backgroundColor: "#2d2d2d",
-            border: "1px solid #444",
-            borderRadius: "4px",
-            color: "white",
-          }}
-        />
-        <input
-          type="text"
-          value={newTokenSymbol}
-          onChange={(e) => setNewTokenSymbol(e.target.value)}
-          placeholder="符號 (選填)"
-          style={{
-            flex: "1 1 80px",
-            padding: "8px 12px",
-            backgroundColor: "#2d2d2d",
-            border: "1px solid #444",
-            borderRadius: "4px",
-            color: "white",
-          }}
-        />
-        <input
-          type="number"
-          value={newTokenDecimals}
-          onChange={(e) => setNewTokenDecimals(e.target.value)}
-          placeholder="小數位 (例: 18)"
-          style={{
-            flex: "1 1 60px",
-            padding: "8px 12px",
-            backgroundColor: "#2d2d2d",
-            border: "1px solid #444",
-            borderRadius: "4px",
-            color: "white",
-          }}
-        />
-        <select
-          value={newTokenChain}
-          onChange={(e) => setNewTokenChain(e.target.value as "mainnet" | "base")}
-          style={{
-            flex: "1 1 90px",
-            padding: "8px 12px",
-            backgroundColor: "#2d2d2d",
-            border: "1px solid #444",
-            borderRadius: "4px",
-            color: "white",
-            cursor: "pointer",
-          }}
-        >
-          <option value="mainnet">Mainnet</option>
-          <option value="base">Base</option>
-        </select>
-        <button
-          onClick={handleAddToken}
-          style={{
-            padding: "8px 16px",
-            backgroundColor: "#0e639c",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-            flex: "0 0 auto",
-          }}
-        >
-          新增代幣
-        </button>
       </div>
 
       {/* 代幣列表 */}
@@ -310,7 +197,7 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
                   width: "50%",
                 }}
               >
-                代幣地址
+                Token Address
               </th>
               <th
                 style={{
@@ -320,7 +207,7 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
                   width: "10%",
                 }}
               >
-                小數位
+                Decimals
               </th>
               <th
                 style={{
@@ -330,7 +217,7 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
                   width: "15%",
                 }}
               >
-                鏈
+                Chain
               </th>
               <th
                 style={{
@@ -340,7 +227,7 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
                   width: "25%",
                 }}
               >
-                操作
+                Actions
               </th>
             </tr>
           </thead>
@@ -395,7 +282,7 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
                           type="text"
                           value={editSymbol}
                           onChange={(e) => setEditSymbol(e.target.value)}
-                          placeholder="符號"
+                          placeholder="Symbol"
                           style={{
                             width: "80px",
                             padding: "4px 8px",
@@ -460,7 +347,7 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
                             cursor: "pointer",
                           }}
                         >
-                          保存
+                          Save
                         </button>
                         <button
                           onClick={handleCancelEdit}
@@ -474,7 +361,7 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
                             cursor: "pointer",
                           }}
                         >
-                          取消
+                          Cancel
                         </button>
                       </div>
                     ) : (
@@ -497,7 +384,7 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
                             cursor: "pointer",
                           }}
                         >
-                          編輯
+                          Edit
                         </button>
                         <button
                           onClick={() => handleDeleteToken(token.address)}
@@ -511,7 +398,7 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
                             cursor: "pointer",
                           }}
                         >
-                          刪除
+                          Delete
                         </button>
                       </div>
                     )}
@@ -529,8 +416,8 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
                   }}
                 >
                   {searchTerm || selectedChain !== "all"
-                    ? "沒有符合篩選條件的代幣"
-                    : "沒有代幣資料"}
+                    ? "No tokens match the filter"
+                    : "No token data"}
                 </td>
               </tr>
             )}

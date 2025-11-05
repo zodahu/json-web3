@@ -20,7 +20,7 @@ const ResultPane: React.FC<ResultPaneProps> = ({ json }) => {
         }}
       >
         <h2 style={{ fontSize: "1.1rem", fontWeight: "500", margin: 0 }}>
-          轉換結果
+          Converted Result
         </h2>
       </div>
 
@@ -63,7 +63,7 @@ const ResultPane: React.FC<ResultPaneProps> = ({ json }) => {
               backgroundColor: "#1e1e1e",
             }}
           >
-            轉換結果將顯示在這裡
+            Converted result will be displayed here
           </div>
         )}
       </div>

@@ -47,7 +47,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             cursor: "pointer",
           }}
         >
-          轉換鍵名
+          Key Mappings
         </button>
         <button
           onClick={() => setActiveTab("decimals")}
@@ -61,7 +61,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             cursor: "pointer",
           }}
         >
-          代幣小數位
+          Token Decimals
         </button>
       </div>
 

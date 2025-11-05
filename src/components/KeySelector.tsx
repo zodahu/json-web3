@@ -29,21 +29,21 @@ const KeySelector: React.FC<KeySelectorProps> = ({ keys, onChange }) => {
 
   return (
     <div className="bg-gray-800 p-4 rounded-md mb-4">
-      <h3 className="text-lg font-medium mb-2">轉換鍵名</h3>
+      <h3 className="text-lg font-medium mb-2">Key Mappings</h3>
       <div className="flex items-center mb-2">
         <input
           type="text"
           value={newKey}
           onChange={(e) => setNewKey(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder="新增鍵名 (例如: amountIn)"
+          placeholder="Add key (e.g., amountIn)"
           className="flex-1 p-2 bg-gray-700 rounded-l-md text-white"
         />
         <button
           onClick={handleAddKey}
           className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-r-md"
         >
-          新增
+          Add
         </button>
       </div>
       <div className="flex flex-wrap gap-2">

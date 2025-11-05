@@ -229,6 +229,11 @@ export const useConvertAmounts = (initialMappings: TokenMapping[] = []) => {
             symbol: tokenInfoData.symbol,
           };
 
+          // 為 sellToken 添加 symbol (只在還沒有添加時)
+          if (currentTokenInfo.symbol && typeof obj.sellToken === 'string' && !obj.sellToken.includes('(')) {
+            obj.sellToken = `${obj.sellToken} (${currentTokenInfo.symbol})`;
+          }
+
           // 處理該對象內的 sellAmount
           for (const amountKey of amountKeys) {
             if (amountKey in obj && typeof obj[amountKey] === "string") {
@@ -237,7 +242,7 @@ export const useConvertAmounts = (initialMappings: TokenMapping[] = []) => {
                 currentTokenInfo.decimals
               );
               obj[amountKey] = currentTokenInfo.symbol
-                ? `${convertedAmount} ${currentTokenInfo.symbol}`
+                ? `${convertedAmount} (${currentTokenInfo.symbol})`
                 : `${convertedAmount}`;
             }
           }
@@ -255,6 +260,11 @@ export const useConvertAmounts = (initialMappings: TokenMapping[] = []) => {
             symbol: tokenInfoData.symbol,
           };
 
+          // 為 buyToken 添加 symbol (只在還沒有添加時)
+          if (currentTokenInfo.symbol && typeof obj.buyToken === 'string' && !obj.buyToken.includes('(')) {
+            obj.buyToken = `${obj.buyToken} (${currentTokenInfo.symbol})`;
+          }
+
           // 處理該對象內的 buyAmount
           for (const amountKey of amountKeys) {
             if (amountKey in obj && typeof obj[amountKey] === "string") {
@@ -263,7 +273,7 @@ export const useConvertAmounts = (initialMappings: TokenMapping[] = []) => {
                 currentTokenInfo.decimals
               );
               obj[amountKey] = currentTokenInfo.symbol
-                ? `${convertedAmount} ${currentTokenInfo.symbol}`
+                ? `${convertedAmount} (${currentTokenInfo.symbol})`
                 : `${convertedAmount}`;
             }
           }
@@ -275,6 +285,15 @@ export const useConvertAmounts = (initialMappings: TokenMapping[] = []) => {
           const { decimals, symbol } = tokenInfo[tokenPath];
 
           if (!Array.isArray(obj)) {
+            // 為 tokenKey 添加 symbol (只在還沒有添加時)
+            if (tokenKey in obj && typeof obj[tokenKey] === "string" && symbol) {
+              const tokenValue = obj[tokenKey] as string;
+              if (!tokenValue.includes('(')) {
+                obj[tokenKey] = `${tokenValue} (${symbol})`;
+              }
+            }
+
+            // 處理金額鍵
             for (const amountKey of amountKeys) {
               if (amountKey in obj && typeof obj[amountKey] === "string") {
                 const convertedAmount = weiToDecimal(
@@ -282,7 +301,7 @@ export const useConvertAmounts = (initialMappings: TokenMapping[] = []) => {
                   decimals
                 );
                 obj[amountKey] = symbol
-                  ? `${convertedAmount} ${symbol}`
+                  ? `${convertedAmount} (${symbol})`
                   : `${convertedAmount}`;
               }
             }
