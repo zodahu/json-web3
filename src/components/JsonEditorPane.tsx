@@ -50,60 +50,38 @@ const JsonEditorPane: React.FC<JsonEditorPaneProps> = ({ json, onChange }) => {
 
   return (
     <div
-      style={{ display: "flex", flexDirection: "column", height: "100%" }}
+      style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}
     >
-      <div
-        style={{
-          padding: "10px 16px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          borderBottom: "1px solid #333",
-          backgroundColor: "#252526",
+      <Editor
+        height="100%"
+        defaultLanguage="json"
+        value={editorContent}
+        onChange={handleEditorChange}
+        onMount={handleEditorDidMount}
+        theme="vs-dark"
+        options={{
+          minimap: { enabled: false },
+          scrollBeyondLastLine: false,
+          fontSize: 14,
+          tabSize: 2,
+          automaticLayout: true,
+          formatOnPaste: false, // Disable for large files performance
+          formatOnType: false, // Disable for large files performance
+          scrollbar: {
+            vertical: "auto",
+            horizontal: "auto",
+          },
+          overviewRulerLanes: 0, // Disable overview ruler
+          // Performance optimizations for large files
+          occurrencesHighlight: "off",
+          selectionHighlight: false,
+          renderLineHighlight: "none",
+          folding: true,
+          foldingHighlight: false,
+          links: false,
+          colorDecorators: false,
         }}
-      >
-        <h2 style={{ fontSize: "1.1rem", fontWeight: "500", margin: 0 }}>
-          JSON Editor
-        </h2>
-      </div>
-
-      <div
-        style={{
-          flex: 1,
-          overflow: "hidden", // Ensure scrollbar appears within editor
-        }}
-      >
-        <Editor
-          height="100%"
-          defaultLanguage="json"
-          value={editorContent}
-          onChange={handleEditorChange}
-          onMount={handleEditorDidMount}
-          theme="vs-dark"
-          options={{
-            minimap: { enabled: false },
-            scrollBeyondLastLine: false,
-            fontSize: 14,
-            tabSize: 2,
-            automaticLayout: true,
-            formatOnPaste: false, // Disable for large files performance
-            formatOnType: false, // Disable for large files performance
-            scrollbar: {
-              vertical: "auto",
-              horizontal: "auto",
-            },
-            overviewRulerLanes: 0, // Disable overview ruler
-            // Performance optimizations for large files
-            occurrencesHighlight: "off",
-            selectionHighlight: false,
-            renderLineHighlight: "none",
-            folding: true,
-            foldingHighlight: false,
-            links: false,
-            colorDecorators: false,
-          }}
-        />
-      </div>
+      />
     </div>
   );
 };

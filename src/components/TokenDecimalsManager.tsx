@@ -63,6 +63,16 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
     }
     
     return true;
+  }).map((token) => {
+    // For native aliases, override the chain to match the current filter
+    const isNativeAlias = NATIVE_TOKEN_ALIASES.includes(token.address.toLowerCase());
+    if (isNativeAlias && selectedChain !== "all") {
+      return {
+        ...token,
+        chain: selectedChain as "mainnet" | "base",
+      };
+    }
+    return token;
   });
 
   // 刪除代幣

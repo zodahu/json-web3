@@ -202,112 +202,117 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-4">
-      {/* 標籤頁導航 */}
+    <div className="min-h-screen bg-gray-900 text-white" style={{ position: "relative" }}>
+      {/* 浮空 Settings 按鈕 */}
+      <button
+        onClick={() => handleTabChange(activeTab === "settings" ? "main" : "settings")}
+        style={{
+          position: "fixed",
+          top: "20px",
+          right: "20px",
+          padding: "12px 24px",
+          backgroundColor: activeTab === "settings" ? "#0e639c" : "#252526",
+          border: "1px solid #444",
+          borderRadius: "8px",
+          color: "white",
+          fontSize: "14px",
+          fontWeight: "500",
+          cursor: "pointer",
+          zIndex: 1000,
+          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.3)",
+          transition: "all 0.2s",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = activeTab === "settings" ? "#0a4d7a" : "#2d2d2d";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = activeTab === "settings" ? "#0e639c" : "#252526";
+        }}
+      >
+        {activeTab === "settings" ? "✕ Close" : "⚙ Settings"}
+      </button>
+
+      {/* 主內容區 */}
       <div
         style={{
           display: "flex",
-          backgroundColor: "#252526",
-          borderTopLeftRadius: "8px",
-          borderTopRightRadius: "8px",
-          overflow: "hidden",
+          flexDirection: "row",
+          gap: "16px",
+          padding: "16px",
+          height: "100vh",
         }}
       >
-        <button
-          onClick={() => handleTabChange("main")}
+        {/* JSON 編輯器 */}
+        <div
           style={{
-            flex: 1,
-            padding: "12px 16px",
-            backgroundColor: activeTab === "main" ? "#1e1e1e" : "#252526",
-            border: "none",
-            borderBottom: activeTab === "main" ? "2px solid #0e639c" : "none",
-            color: activeTab === "main" ? "white" : "#ccc",
-            fontWeight: activeTab === "main" ? "500" : "normal",
-            cursor: "pointer",
+            width: "50%",
+            height: "100%",
+            backgroundColor: "#1e1e1e",
+            border: "1px solid #333",
+            borderRadius: "8px",
+            display: "flex",
+            flexDirection: "column",
           }}
         >
-          Converter
-        </button>
-        <button
-          onClick={() => handleTabChange("settings")}
+          <JsonEditorPane json={editorJson} onChange={setEditorJson} />
+        </div>
+
+        {/* 轉換結果 */}
+        <div
           style={{
-            flex: 1,
-            padding: "12px 16px",
-            backgroundColor: activeTab === "settings" ? "#1e1e1e" : "#252526",
-            border: "none",
-            borderBottom:
-              activeTab === "settings" ? "2px solid #0e639c" : "none",
-            color: activeTab === "settings" ? "white" : "#ccc",
-            fontWeight: activeTab === "settings" ? "500" : "normal",
-            cursor: "pointer",
+            width: "50%",
+            height: "100%",
+            backgroundColor: "#1e1e1e",
+            border: "1px solid #333",
+            borderRadius: "8px",
+            display: "flex",
+            flexDirection: "column",
           }}
         >
-          Settings
-        </button>
+          <ResultPane json={convertedJson} />
+        </div>
       </div>
 
-      {/* 標籤頁內容 */}
-      <div
-        style={{
-          backgroundColor: "#1e1e1e",
-          borderBottomLeftRadius: "8px",
-          borderBottomRightRadius: "8px",
-          boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-          padding: activeTab === "settings" ? "16px" : "0",
-          minHeight: activeTab === "settings" ? "80vh" : "auto",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        {activeTab === "main" ? (
+      {/* Settings Modal */}
+      {activeTab === "settings" && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
+            zIndex: 999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "40px",
+          }}
+          onClick={() => handleTabChange("main")}
+        >
           <div
             style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: "16px",
-              padding: "16px",
-              height: "calc(100vh - 100px)", // Fill screen height minus tabs
+              backgroundColor: "#1e1e1e",
+              borderRadius: "12px",
+              boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.5)",
+              width: "100%",
+              maxWidth: "1200px",
+              maxHeight: "90vh",
+              overflow: "auto",
+              padding: "24px",
             }}
+            onClick={(e) => e.stopPropagation()}
           >
-            {/* JSON 編輯器 */}
-            <div
-              style={{
-                width: "50%",
-                height: "100%",
-                backgroundColor: "#1e1e1e",
-                border: "1px solid #333",
-                borderRadius: "8px",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <JsonEditorPane json={editorJson} onChange={setEditorJson} />
-            </div>
-
-            {/* 轉換結果 */}
-            <div
-              style={{
-                width: "50%",
-                height: "100%",
-                backgroundColor: "#1e1e1e",
-                border: "1px solid #333",
-                borderRadius: "8px",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <ResultPane json={convertedJson} />
-            </div>
+            <SettingsPanel
+              tokenDecimals={tokenDecimals}
+              mappings={mappings}
+              onUpdateTokenDecimals={handleUpdateTokenDecimals}
+              onUpdateMappings={updateMappings}
+            />
           </div>
-        ) : (
-          <SettingsPanel
-            tokenDecimals={tokenDecimals}
-            mappings={mappings}
-            onUpdateTokenDecimals={handleUpdateTokenDecimals}
-            onUpdateMappings={updateMappings}
-          />
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

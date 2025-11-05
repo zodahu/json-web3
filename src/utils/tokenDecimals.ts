@@ -223,7 +223,15 @@ export const getTokensByChain = (
     const isNativeAlias = NATIVE_TOKEN_ALIASES.includes(address.toLowerCase());
 
     if (info.chain === chain || isNativeAlias) {
-      filtered[address] = info;
+      // For native aliases, override the chain to match the current filter
+      if (isNativeAlias) {
+        filtered[address] = {
+          ...info,
+          chain: chain, // Display the current chain instead of hardcoded "mainnet"
+        };
+      } else {
+        filtered[address] = info;
+      }
     }
   }
 
