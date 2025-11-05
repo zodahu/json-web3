@@ -6,7 +6,19 @@ export interface TokenInfo {
 }
 
 export const defaultTokenDecimals: Record<string, TokenInfo> = {
-  // Empty - all tokens will be fetched via RPC
+  // Native token aliases (special addresses used by protocols like 1inch, CoW, etc.)
+  // These addresses represent native ETH and work on any EVM chain
+  // They are not real contracts, so we provide defaults to skip RPC calls
+  "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee": {
+    decimals: 18,
+    symbol: "ETH",
+    chain: "mainnet", // chain field is not strictly relevant for these virtual addresses
+  },
+  "0x0000000000000000000000000000000000000000": {
+    decimals: 18,
+    symbol: "ETH",
+    chain: "mainnet", // chain field is not strictly relevant for these virtual addresses
+  },
 };
 
 // 保存當前的 tokenDecimals 對象
@@ -24,6 +36,14 @@ export const updateTokenDecimals = (
 
   for (const [address, info] of Object.entries(newTokenDecimals)) {
     normalizedTokenDecimals[address.toLowerCase()] = info;
+  }
+
+  // Always preserve native token aliases from defaultTokenDecimals
+  // This ensures they're never lost when updating tokens
+  for (const [address, info] of Object.entries(defaultTokenDecimals)) {
+    if (!normalizedTokenDecimals[address.toLowerCase()]) {
+      normalizedTokenDecimals[address.toLowerCase()] = info;
+    }
   }
 
   tokenDecimals = normalizedTokenDecimals;
@@ -186,6 +206,12 @@ export const getTokenInfo = async (
   return results.get(tokenAddress.toLowerCase()) || null;
 };
 
+// Native token aliases that should appear on all chains
+const NATIVE_TOKEN_ALIASES = [
+  "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  "0x0000000000000000000000000000000000000000",
+];
+
 // 獲取按鏈篩選的 tokens
 export const getTokensByChain = (
   chain: "mainnet" | "base"
@@ -193,7 +219,10 @@ export const getTokensByChain = (
   const filtered: Record<string, TokenInfo> = {};
 
   for (const [address, info] of Object.entries(tokenDecimals)) {
-    if (info.chain === chain) {
+    // Native token aliases should appear on all chains
+    const isNativeAlias = NATIVE_TOKEN_ALIASES.includes(address.toLowerCase());
+
+    if (info.chain === chain || isNativeAlias) {
       filtered[address] = info;
     }
   }

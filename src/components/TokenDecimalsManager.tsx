@@ -37,10 +37,19 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
     setTokenList(list);
   }, [tokenDecimals]);
 
+  // Native token aliases that should appear on all chains
+  const NATIVE_TOKEN_ALIASES = [
+    "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "0x0000000000000000000000000000000000000000",
+  ];
+
   // 過濾後的列表
   const filteredTokens = tokenList.filter((token) => {
+    // Native token aliases should appear on all chains
+    const isNativeAlias = NATIVE_TOKEN_ALIASES.includes(token.address.toLowerCase());
+    
     // 鏈篩選
-    if (selectedChain !== "all" && token.chain !== selectedChain) {
+    if (selectedChain !== "all" && token.chain !== selectedChain && !isNativeAlias) {
       return false;
     }
     
@@ -58,6 +67,13 @@ const TokenDecimalsManager: React.FC<TokenDecimalsManagerProps> = ({
 
   // 刪除代幣
   const handleDeleteToken = (address: string) => {
+    // Prevent deletion of native token aliases
+    const isNativeAlias = NATIVE_TOKEN_ALIASES.includes(address.toLowerCase());
+    if (isNativeAlias) {
+      alert("Cannot delete native token aliases (0xee...ee or 0x00...00)");
+      return;
+    }
+    
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { [address]: _, ...rest } = tokenDecimals;
     onUpdate(rest);

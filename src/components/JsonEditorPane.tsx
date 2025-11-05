@@ -50,7 +50,7 @@ const JsonEditorPane: React.FC<JsonEditorPaneProps> = ({ json, onChange }) => {
 
   return (
     <div
-      style={{ display: "flex", flexDirection: "column", minHeight: "60vh" }}
+      style={{ display: "flex", flexDirection: "column", height: "100%" }}
     >
       <div
         style={{
@@ -70,11 +70,11 @@ const JsonEditorPane: React.FC<JsonEditorPaneProps> = ({ json, onChange }) => {
       <div
         style={{
           flex: 1,
-          minHeight: "60vh",
+          overflow: "hidden", // Ensure scrollbar appears within editor
         }}
       >
         <Editor
-          height="60vh"
+          height="100%"
           defaultLanguage="json"
           value={editorContent}
           onChange={handleEditorChange}
@@ -86,8 +86,22 @@ const JsonEditorPane: React.FC<JsonEditorPaneProps> = ({ json, onChange }) => {
             fontSize: 14,
             tabSize: 2,
             automaticLayout: true,
-            formatOnPaste: true,
-            formatOnType: true,
+            formatOnPaste: false, // Disable for large files performance
+            formatOnType: false, // Disable for large files performance
+            scrollbar: {
+              vertical: "auto",
+              horizontal: "auto",
+            },
+            overviewRulerLanes: 0, // Disable overview ruler
+            // Performance optimizations for large files
+            occurrencesHighlight: false,
+            selectionHighlight: false,
+            renderLineHighlight: "none",
+            codeLens: false,
+            folding: true,
+            foldingHighlight: false,
+            links: false,
+            colorDecorators: false,
           }}
         />
       </div>

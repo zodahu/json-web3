@@ -153,9 +153,12 @@ function App() {
   const { convertedJson, convertAmounts, mappings, updateMappings } =
     useConvertAmounts(defaultMappings);
 
-  // 當 JSON 或映射變化時，重新轉換
+  // 當 JSON 或映射變化時，重新轉換（使用 debounce 避免頻繁觸發）
   useEffect(() => {
-    if (editorJson) {
+    if (!editorJson) return;
+
+    // Debounce: 延遲 500ms 才執行轉換，避免輸入時頻繁觸發
+    const timeoutId = setTimeout(() => {
       // 異步轉換
       convertAmounts(editorJson)
         .then(() => {
@@ -165,7 +168,9 @@ function App() {
         .catch((error) => {
           console.error("Failed to convert amounts:", error);
         });
-    }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
   }, [editorJson, mappings, convertAmounts]);
 
   // 更新代幣小數位設定
@@ -261,12 +266,14 @@ function App() {
               flexDirection: "row",
               gap: "16px",
               padding: "16px",
+              height: "calc(100vh - 100px)", // Fill screen height minus tabs
             }}
           >
             {/* JSON 編輯器 */}
             <div
               style={{
                 width: "50%",
+                height: "100%",
                 backgroundColor: "#1e1e1e",
                 border: "1px solid #333",
                 borderRadius: "8px",
@@ -281,6 +288,7 @@ function App() {
             <div
               style={{
                 width: "50%",
+                height: "100%",
                 backgroundColor: "#1e1e1e",
                 border: "1px solid #333",
                 borderRadius: "8px",
@@ -300,20 +308,6 @@ function App() {
           />
         )}
       </div>
-
-      <footer className="mt-8 text-center text-gray-500 text-sm">
-        <p>
-          JSON Decimal |{" "}
-          <a
-            href="https://opensource.org/licenses/MIT"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-blue-400"
-          >
-            MIT License
-          </a>
-        </p>
-      </footer>
     </div>
   );
 }

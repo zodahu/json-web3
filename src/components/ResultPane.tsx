@@ -1,6 +1,7 @@
 import React from 'react';
 
 import Editor from '@monaco-editor/react';
+import type { editor } from "monaco-editor";
 
 interface ResultPaneProps {
   json: Record<string, unknown> | null;
@@ -10,8 +11,13 @@ const ResultPane: React.FC<ResultPaneProps> = ({ json }) => {
   // 格式化 JSON 以便顯示
   const formattedJson = json ? JSON.stringify(json, null, 2) : "";
 
+  // 設置編輯器實例的回調
+  const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor) => {
+    // Editor instance mounted
+  };
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: "60vh" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div
         style={{
           padding: "10px 16px",
@@ -27,14 +33,15 @@ const ResultPane: React.FC<ResultPaneProps> = ({ json }) => {
       <div
         style={{
           flex: 1,
-          minHeight: "60vh",
+          overflow: "hidden", // Ensure scrollbar appears within editor
         }}
       >
         {json ? (
           <Editor
-            height="60vh"
+            height="100%"
             defaultLanguage="json"
             value={formattedJson}
+            onMount={handleEditorDidMount}
             theme="vs-dark"
             options={{
               readOnly: true,
@@ -47,7 +54,19 @@ const ResultPane: React.FC<ResultPaneProps> = ({ json }) => {
               lineNumbers: "on",
               renderValidationDecorations: "off",
               folding: true,
-              renderLineHighlight: "all",
+              renderLineHighlight: "none", // Disable for performance
+              scrollbar: {
+                vertical: "auto",
+                horizontal: "auto",
+              },
+              overviewRulerLanes: 0, // Disable overview ruler
+              // Performance optimizations for large files
+              occurrencesHighlight: false,
+              selectionHighlight: false,
+              codeLens: false,
+              foldingHighlight: false,
+              links: false,
+              colorDecorators: false,
             }}
           />
         ) : (
@@ -55,8 +74,7 @@ const ResultPane: React.FC<ResultPaneProps> = ({ json }) => {
             style={{
               color: "#666",
               textAlign: "center",
-              marginTop: "40px",
-              minHeight: "60vh",
+              height: "100%",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
