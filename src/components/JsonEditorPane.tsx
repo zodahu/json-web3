@@ -94,10 +94,9 @@ const JsonEditorPane: React.FC<JsonEditorPaneProps> = ({ json, onChange }) => {
             },
             overviewRulerLanes: 0, // Disable overview ruler
             // Performance optimizations for large files
-            occurrencesHighlight: false,
+            occurrencesHighlight: "off",
             selectionHighlight: false,
             renderLineHighlight: "none",
-            codeLens: false,
             folding: true,
             foldingHighlight: false,
             links: false,

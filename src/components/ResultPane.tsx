@@ -12,7 +12,7 @@ const ResultPane: React.FC<ResultPaneProps> = ({ json }) => {
   const formattedJson = json ? JSON.stringify(json, null, 2) : "";
 
   // 設置編輯器實例的回調
-  const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor) => {
+  const handleEditorDidMount = (_editor: editor.IStandaloneCodeEditor) => {
     // Editor instance mounted
   };
 
@@ -61,9 +61,8 @@ const ResultPane: React.FC<ResultPaneProps> = ({ json }) => {
               },
               overviewRulerLanes: 0, // Disable overview ruler
               // Performance optimizations for large files
-              occurrencesHighlight: false,
+              occurrencesHighlight: "off",
               selectionHighlight: false,
-              codeLens: false,
               foldingHighlight: false,
               links: false,
               colorDecorators: false,
