@@ -1,11 +1,25 @@
 <svg width="192" height="192" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
-  <!-- 白色背景圓形 -->
-  <circle cx="96" cy="96" r="92" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="2" />
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563EB;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#06B6D4;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="192" height="192" rx="42" fill="url(#bg)" />
   
-  <!-- 更大更明顯的字母 D 設計 - 使用鮮豔的綠色 -->
-  <path d="M48 38 H80 C115 38, 140 60, 140 96 C140 132, 115 154, 80 154 H48 Z" fill="#10A37F" />
-  <path d="M58 52 H78 C104 52, 122 70, 122 96 C122 122, 104 140, 78 140 H58 Z" fill="#FFFFFF" />
+  <!-- Left brace { - more centered -->
+  <path d="M72 40 Q56 40, 56 56 L56 80 Q56 92, 44 96 Q56 100, 56 112 L56 136 Q56 152, 72 152" 
+        fill="none" 
+        stroke="#FFFFFF" 
+        stroke-width="14" 
+        stroke-linecap="round" />
   
-  <!-- 更大的小數點符號 -->
-  <circle cx="130" cy="130" r="12" fill="#FF3B30" />
-</svg> 
+  <!-- Right brace } - more centered -->
+  <path d="M120 40 Q136 40, 136 56 L136 80 Q136 92, 148 96 Q136 100, 136 112 L136 136 Q136 152, 120 152" 
+        fill="none" 
+        stroke="#FFFFFF" 
+        stroke-width="14" 
+        stroke-linecap="round" />
+</svg>
